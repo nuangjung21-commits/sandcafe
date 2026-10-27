@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>샌드카페 사장님 비서</title>
+  <!-- Google 로그인 (Google Identity Services) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --card: #ffffff;
+      --primary: #d97706;
+      --primary-dark: #b45309;
+      --accent: #059669;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --danger: #dc2626;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif;
+    }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin: 0;
+      color: #92400e;
+    }
+    .sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.05s;
+    }
+    .btn:active {
+      transform: scale(0.99);
+    }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .btn-mic {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 2px solid #fca5a5;
+      margin-bottom: 10px;
+    }
+    .btn-mic.listening {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-save {
+      background: var(--accent);
+      color: #fff;
+      margin-top: 8px;
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 0.9rem;
+      padding: 9px 12px;
+      width: auto;
+    }
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .mode-tab {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mode-tab.active {
+      background: #fef3c7;
+      border-color: var(--primary);
+      color: #92400e;
+    }
+    .row-box {
+      border: 1px solid var(--border);
+      background: #fcfcfc;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #92400e;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .chip {
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .chip.selected {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .status-msg {
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      margin-top: 10px;
+      display: none;
+    }
+    .status-msg.info {
+      display: block;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .status-msg.success {
+      display: block;
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .status-msg.error {
+      display: block;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .user-badge {
+      font-size: 0.82rem;
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #a7f3d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>🥪 샌드카페 사장님 비서</h1>
+        <div class="sub">말씀만 하세요, 확인 후 「매출」 탭에 바로 기록합니다</div>
+      </div>
+      <div id="userBadge" class="user-badge" style="display:none;"></div>
+    </header>
+
+    <!-- 연결 & Google 로그인 설정 카드 -->
+    <div class="card">
+      <details id="settingsDetails">
+        <summary>⚙️ 웹 앱 주소 & Google 로그인 설정</summary>
+        <div style="margin-top: 12px;">
+          <label for="gasUrlInput">Apps Script 웹 앱 URL (/exec로 끝나는 주소)</label>
+          <input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+
+          <label for="googleClientIdInput">Google Client ID (선택 - Google 로그인 버튼용)</label>
+          <input type="text" id="googleClientIdInput" placeholder="1234567890-xxxx.apps.googleusercontent.com" />
+
+          <button type="button" class="btn btn-secondary" onclick="saveConfig()">설정 저장</button>
+        </div>
+      </details>
+      <div id="googleSignInArea" style="margin-top: 10px; display: none;">
+        <div id="g_id_signin"></div>
+      </div>
+    </div>
+
+    <!-- 1단계: 음성 또는 글자 입력 -->
+    <div class="card">
+      <div class="card-title">
+        <span>1️⃣ 오늘 매출 말하기 / 적기</span>
+      </div>
+
+      <button type="button" id="micBtn" class="btn btn-mic" onclick="toggleSpeech()">
+        🎤 마이크 누르고 말하기
+      </button>
+
+      <label for="rawTextInput">말씀하신 내용 (직접 수정하거나 타이핑하셔도 됩니다)</label>
+      <textarea
+        id="rawTextInput"
+        placeholder="예: 오늘 매출 불고기샌드버거 20개 팔고 영양주먹밥 10개 팔고 오늘 총 30만원 팔았어. 카드 결제고 인스타그램 보고 왔대."
+      ></textarea>
+
+      <button type="button" id="parseBtn" class="btn btn-primary" onclick="analyzeText()">
+        ✨ AI로 매출 장부 정리하기
+      </button>
+
+      <div id="statusBox" class="status-msg"></div>
+    </div>
+
+    <!-- 2단계: AI 정리 결과 확인 & 수정 후 시트 저장 -->
+    <div id="confirmCard" class="card" style="display: none;">
+      <div class="card-title">
+        <span>2️⃣ 내용 확인 후 구글 시트에 저장</span>
+      </div>
+
+      <!-- 한 줄로 묶기 vs 메뉴별 나누기 둘 다 지원 -->
+      <div class="mode-tabs">
+        <div id="tabCombined" class="mode-tab active" onclick="switchMode('combined')">
+          📋 한 줄로 합쳐서 저장
+        </div>
+        <div id="tabSplit" class="mode-tab" onclick="switchMode('items')">
+          📑 메뉴별로 나눠서 저장
+        </div>
+      </div>
+
+      <div id="rowsContainer"></div>
+
+      <div style="display:flex; justify-content:flex-end; margin-bottom: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="addBlankRow()">+ 한 줄 직접 추가</button>
+      </div>
+
+      <button type="button" id="saveBtn" class="btn btn-save" onclick="saveToSheet()">
+        ✅ 확인 완료! 「매출」 시트에 저장하기
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 사장님 맞춤 선택지 목록
+    const MENU_OPTIONS = [
+      '불고기샌드버거',
+      '매콤닭고기샌드버거',
+      '영양주먹밥',
+      '단호박스퍼',
+      '커피',
+      '음료수',
+      '기타'
+    ];
+    const PAYMENT_OPTIONS = ['카드', '현금', '계좌이체', '네이버페이', '기타'];
+    const INFLOW_OPTIONS = ['인스타그램', '네이버 블로그', '네이버 지도', '지인 소개', '재방문', '지나가다', '기타'];
+
+    // 상태 변수
+    let googleIdToken = '';
+    let lastParsedData = { combined: null, items: [] };
+    let currentMode = 'combined'; // 'combined' | 'items'
+    let editableRows = [];
+    let recognition = null;
+    let isListening = false;
+
+    // 초기 로드
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUrl = localStorage.getItem('SANDCAFE_GAS_URL') || '';
+      const savedClientId = localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || '';
+      document.getElementById('gasUrlInput').value = savedUrl;
+      document.getElementById('googleClientIdInput').value = savedClientId;
+
+      if (!savedUrl) {
+        document.getElementById('settingsDetails').open = true;
+      }
+      initGoogleSignIn(savedClientId);
+      initSpeechRecognition();
+    });
+
+    function getTodayStr() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function saveConfig() {
+      const url = document.getElementById('gasUrlInput').value.trim();
+      const clientId = document.getElementById('googleClientIdInput').value.trim();
+      localStorage.setItem('SANDCAFE_GAS_URL', url);
+      localStorage.setItem('SANDCAFE_GOOGLE_CLIENT_ID', clientId);
+      initGoogleSignIn(clientId);
+      showStatus('설정이 저장되었습니다.', 'success');
+    }
+
+    // Google 로그인 초기화
+    function initGoogleSignIn(clientId) {
+      const area = document.getElementById('googleSignInArea');
+      if (!clientId || !window.google || !window.google.accounts) {
+        area.style.display = clientId ? 'block' : 'none';
+        return;
+      }
+      area.style.display = 'block';
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response) => {
+          googleIdToken = response.credential || '';
+          const payload = parseJwt(googleIdToken);
+          const badge = document.getElementById('userBadge');
+          if (payload && payload.email) {
+            badge.textContent = '🔒 ' + payload.email;
+            badge.style.display = 'inline-block';
+          }
+          showStatus('Google 로그인 완료!', 'success');
+        }
+      });
+      window.google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill' }
+      );
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(decodeURIComponent(atob(base64).split('').map((c) =>
+          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        ).join('')));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // 음성 인식 (Web Speech API)
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ko-KR';
+      recognition.interimResults = false;
+      recognition.continuous = true;
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            transcript += event.results[i][0].transcript + ' ';
+          }
+        }
+        if (transcript.trim()) {
+          const input = document.getElementById('rawTextInput');
+          input.value = (input.value ? input.value.trim() + ' ' : '') + transcript.trim();
+        }
+      };
+
+      recognition.onend = () => {
+        if (isListening) {
+          stopListeningUI();
+        }
+      };
+
+      recognition.onerror = (e) => {
+        stopListeningUI();
+        showStatus('음성 인식 오류: ' + e.error + ' (직접 타이핑하셔도 됩니다)', 'error');
+      };
+    }
+
+    function toggleSpeech() {
+      if (!recognition) {
+        alert('이 브라우저에서는 음성 인식을 지원하지 않습니다. 키보드로 입력하거나 크롬/사파리를 이용해 주세요.');
+        return;
+      }
+      if (isListening) {
+        recognition.stop();
+        stopListeningUI();
+      } else {
+        isListening = true;
+        const btn = document.getElementById('micBtn');
+        btn.classList.add('listening');
+        btn.textContent = '🛑 말하기 끝 (누르면 멈춤)';
+        recognition.start();
+      }
+    }
+
+    function stopListeningUI() {
+      isListening = false;
+      const btn = document.getElementById('micBtn');
+      btn.classList.remove('listening');
+      btn.textContent = '🎤 마이크 누르고 말하기';
+    }
+
+    // AI로 정리 요청
+    async function analyzeText() {
+      if (isListening && recognition) {
+        recognition.stop();
+        stopListeningUI();
+      }
+
+      const gasUrl = (document.getElementById('gasUrlInput').value || '').trim();
+      const rawText = (document.getElementById('rawTextInput').value || '').trim();
+
+      if (!gasUrl) {
+        document.getElementById('settingsDetails').open = true;
+        showStatus('먼저 위 설정에서 Apps Script 웹 앱 URL을 입력해 주세요.', 'error');
+        return;
+      }
+      if (!rawText) {
+        showStatus('오늘 매출 내용을 말씀하시거나 적어 주세요.', 'error');
+        return;
+      }
+
+      const parseBtn = document.getElementById('parseBtn');
+      parseBtn.disabled = true;
+      showStatus('🤖 AI 비서가 매출 내용을 정리하고 있습니다...', 'info');
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'parse',
+            text: rawText,
+            today: getTodayStr(),
+            idToken: googleIdToken
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) {
+          throw new Error(json.error || 'AI 정리에 실패했습니다.');
+        }
+
+        lastParsedData = json.data;
+        switchMode(currentMode);
+        document.getElementById('confirmCard').style.display = 'block';
+        showStatus('✨ 정리가 완료되었습니다! 아래 내용을 확인하신 뒤 저장 버튼을 눌러 주세요.', 'success');
+      } catch (err) {
+        showStatus('오류: ' + err.message, 'error');
+      } finally {
+        parseBtn.disabled = false;
+      }
+    }
+
+    // 한 줄 합치기 / 메뉴별 나누기 전환
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('tabCombined').classList.toggle('active', mode === 'combined');
+      document.getElementById('tabSplit').classList.toggle('active', mode === 'items');
+
+      if (mode === 'combined' && lastParsedData.combined) {
+        editableRows = [Object.assign({}, lastParsedData.combined)];
+      } else if (mode === 'items' && Array.isArray(lastParsedData.items)) {
+        editableRows = lastParsedData.items.map((r) => Object.assign({}, r));
+      }
+      renderRows();
+    }
+
+    function addBlankRow() {
+      const rawText = (document.getElementById('rawTextInput').value || '').trim();
+      editableRows.push({
+        날짜: getTodayStr(),
+        구분: '불고기샌드버거',
+        인원: '',
+        금액: 0,
+        결제수단: '카드',
+        유입경로: '기타',
+        메모: rawText
+      });
+      renderRows();
+    }
+
+    function removeRow(idx) {
+      if (editableRows.length <= 1) {
+        alert('최소 1줄은 있어야 합니다.');
+        return;
+      }
+      editableRows.splice(idx, 1);
+      renderRows();
+    }
+
+    function updateField(idx, field, value) {
+      if (!editableRows[idx]) return;
+      editableRows[idx][field] = value;
+    }
+
+    function selectChip(idx, field, value) {
+      updateField(idx, field, value);
+      renderRows();
+    }
+
+    function renderRows() {
+      const container = document.getElementById('rowsContainer');
+      container.innerHTML = '';
+
+      editableRows.forEach((row, idx) => {
+        const box = document.createElement('div');
+        box.className = 'row-box';
+
+        const menuChipsHtml = MENU_OPTIONS.map((opt) => {
+          const isSel = row['구분'] === opt ? 'selected' : '';
+          return `<span class="chip ${isSel}" onclick="selectChip(${idx}, '구분', '${opt}')">${opt}</span>`;
+        }).join('');
+
+        const payChipsHtml = PAYMENT_OPTIONS.map((opt) => {
+          const isSel = row['결제수단'] === opt ? 'selected' : '';
+          return `<span class="chip ${isSel}" onclick="selectChip(${idx}, '결제수단', '${opt}')">${opt}</span>`;
+        }).join('');
+
+        const inflowChipsHtml = INFLOW_OPTIONS.map((opt) => {
+          const isSel = row['유입경로'] === opt ? 'selected' : '';
+          return `<span class="chip ${isSel}" onclick="selectChip(${idx}, '유입경로', '${opt}')">${opt}</span>`;
+        }).join('');
+
+        box.innerHTML = `
+          <div class="row-header">
+            <span>저장할 행 #${idx + 1}</span>
+            ${editableRows.length > 1 ? `<button type="button" class="btn btn-secondary" style="color:#dc2626;" onclick="removeRow(${idx})">삭제</button>` : ''}
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label>날짜</label>
+              <input type="date" value="${escapeHtml(row['날짜'] || getTodayStr())}" onchange="updateField(${idx}, '날짜', this.value)" />
+            </div>
+            <div>
+              <label>인원 (또는 수량)</label>
+              <input type="text" value="${escapeHtml(row['인원'] ?? '')}" placeholder="예: 30" oninput="updateField(${idx}, '인원', this.value)" />
+            </div>
+          </div>
+
+          <label>구분 (버튼을 누르거나 직접 수정 가능)</label>
+          <div class="chip-group">${menuChipsHtml}</div>
+          <input type="text" value="${escapeHtml(row['구분'] || '')}" oninput="updateField(${idx}, '구분', this.value)" />
+
+          <label>금액 (원)</label>
+          <input type="number" value="${Number(String(row['금액'] || 0).replace(/[^0-9.-]/g, '')) || 0}" oninput="updateField(${idx}, '금액', this.value)" />
+
+          <label>결제수단</label>
+          <div class="chip-group">${payChipsHtml}</div>
+
+          <label>유입경로</label>
+          <div class="chip-group">${inflowChipsHtml}</div>
+
+          <label>메모 (말한 원문)</label>
+          <input type="text" value="${escapeHtml(row['메모'] || '')}" oninput="updateField(${idx}, '메모', this.value)" />
+        `;
+
+        container.appendChild(box);
+      });
+    }
+
+    // 시트에 최종 저장
+    async function saveToSheet() {
+      const gasUrl = (document.getElementById('gasUrlInput').value || '').trim();
+      if (!gasUrl) {
+        showStatus('Apps Script 웹 앱 URL을 먼저 설정해 주세요.', 'error');
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      showStatus('📥 구글 시트 「매출」 탭에 저장 중입니다...', 'info');
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'save',
+            rows: editableRows,
+            idToken: googleIdToken
+          })
+        });
+
+        const json = await res.json();
+        if (!json.ok) {
+          throw new Error(json.error || '저장에 실패했습니다.');
+        }
+
+        showStatus(`🎉 구글 시트 「매출」 탭에 총 ${json.savedCount}줄이 저장되었습니다!`, 'success');
+        document.getElementById('rawTextInput').value = '';
+        document.getElementById('confirmCard').style.display = 'none';
+      } catch (err) {
+        showStatus('저장 오류: ' + err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    function showStatus(msg, type) {
+      const box = document.getElementById('statusBox');
+      box.textContent = msg;
+      box.className = 'status-msg ' + (type || 'info');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
