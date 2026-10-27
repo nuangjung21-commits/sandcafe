@@ -342,6 +342,10 @@
     const PAYMENT_OPTIONS = ['카드', '현금', '계좌이체', '네이버페이', '기타'];
     const INFLOW_OPTIONS = ['인스타그램', '네이버 블로그', '네이버 지도', '지인 소개', '재방문', '지나가다', '기타'];
 
+    // 기본 연결 설정 (내장)
+    const DEFAULT_GAS_URL = '';
+    const DEFAULT_GOOGLE_CLIENT_ID = '503601555207-4rn6hdsvidho5vn4hsanq55u2cgeobkp.apps.googleusercontent.com';
+
     // 상태 변수
     let googleIdToken = '';
     let lastParsedData = { combined: null, items: [] };
@@ -356,8 +360,8 @@
       if (originEl) {
         originEl.value = window.location.origin;
       }
-      const savedUrl = localStorage.getItem('SANDCAFE_GAS_URL') || '';
-      const savedClientId = localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || '';
+      const savedUrl = localStorage.getItem('SANDCAFE_GAS_URL') || DEFAULT_GAS_URL;
+      const savedClientId = localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || DEFAULT_GOOGLE_CLIENT_ID;
       document.getElementById('gasUrlInput').value = savedUrl;
       document.getElementById('googleClientIdInput').value = savedClientId;
 
@@ -369,7 +373,7 @@
     });
 
     function onGoogleLibraryLoad() {
-      const savedClientId = (document.getElementById('googleClientIdInput')?.value || localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || '').trim();
+      const savedClientId = (document.getElementById('googleClientIdInput')?.value || localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || DEFAULT_GOOGLE_CLIENT_ID).trim();
       if (savedClientId) {
         initGoogleSignIn(savedClientId);
       }
