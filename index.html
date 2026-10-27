@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>샌드카페 사장님 비서</title>
   <!-- Google 로그인 (Google Identity Services) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleLibraryLoad()"></script>
   <style>
     :root {
       --bg: #faf7f2;
@@ -257,10 +257,16 @@
       <details id="settingsDetails">
         <summary>⚙️ 웹 앱 주소 & Google 로그인 설정</summary>
         <div style="margin-top: 12px;">
+          <label>현재 사이트 주소 (구글 클라우드 '승인된 JavaScript 원본'에 그대로 등록할 주소)</label>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <input type="text" id="currentOriginDisplay" readonly style="margin-bottom:0; background:#f9fafb; color:#374151;" />
+            <button type="button" class="btn btn-secondary" style="white-space:nowrap;" onclick="copyOrigin()">주소 복사</button>
+          </div>
+
           <label for="gasUrlInput">Apps Script 웹 앱 URL (/exec로 끝나는 주소)</label>
           <input type="text" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
 
-          <label for="googleClientIdInput">Google Client ID (선택 - Google 로그인 버튼용)</label>
+          <label for="googleClientIdInput">Google Client ID (구글 로그인 클라이언트 ID)</label>
           <input type="text" id="googleClientIdInput" placeholder="1234567890-xxxx.apps.googleusercontent.com" />
 
           <button type="button" class="btn btn-secondary" onclick="saveConfig()">설정 저장</button>
@@ -346,6 +352,10 @@
 
     // 초기 로드
     window.addEventListener('DOMContentLoaded', () => {
+      const originEl = document.getElementById('currentOriginDisplay');
+      if (originEl) {
+        originEl.value = window.location.origin;
+      }
       const savedUrl = localStorage.getItem('SANDCAFE_GAS_URL') || '';
       const savedClientId = localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || '';
       document.getElementById('gasUrlInput').value = savedUrl;
@@ -357,6 +367,20 @@
       initGoogleSignIn(savedClientId);
       initSpeechRecognition();
     });
+
+    function onGoogleLibraryLoad() {
+      const savedClientId = (document.getElementById('googleClientIdInput')?.value || localStorage.getItem('SANDCAFE_GOOGLE_CLIENT_ID') || '').trim();
+      if (savedClientId) {
+        initGoogleSignIn(savedClientId);
+      }
+    }
+
+    function copyOrigin() {
+      const origin = window.location.origin;
+      navigator.clipboard.writeText(origin).then(() => {
+        showStatus('현재 주소(' + origin + ')가 복사되었습니다! Google Cloud 승인된 JavaScript 원본에 붙여넣으세요.', 'success');
+      });
+    }
 
     function getTodayStr() {
       const d = new Date();
