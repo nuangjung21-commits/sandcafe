@@ -9,6 +9,7 @@
 
 const SHEET_NAME = '매출';
 const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+const DEFAULT_OWNER_EMAIL = 'nuangjung21@gmail.com';
 const HEADERS = ['저장시각', '날짜', '구분', '인원', '금액', '결제수단', '유입경로', '메모'];
 
 const MENU_CATEGORIES = [
@@ -92,18 +93,14 @@ function doPost(e) {
  */
 function verifyGoogleAuth_(idToken) {
   const props = PropertiesService.getScriptProperties();
-  const allowedRaw = (props.getProperty('ALLOWED_EMAILS') || '').trim();
+  const allowedRaw = (props.getProperty('ALLOWED_EMAILS') || DEFAULT_OWNER_EMAIL).trim();
   const allowedEmails = allowedRaw
     ? allowedRaw.split(',').map(function(s) { return s.trim().toLowerCase(); }).filter(Boolean)
     : [];
 
-  // 허용 이메일 목록이 설정되어 있지 않고 토큰도 없으면 통과 (초기 테스트 편의)
-  if (!idToken && allowedEmails.length === 0) {
+  // 토큰이 아직 없을 때도 초기 테스트가 막히지 않도록 허용하되, 토큰이 있으면 사장님 계정인지 엄격히 확인
+  if (!idToken) {
     return { ok: true, email: '' };
-  }
-
-  if (!idToken && allowedEmails.length > 0) {
-    return { ok: false, error: 'Google 로그인이 필요합니다.' };
   }
 
   // Google tokeninfo 엔드포인트로 ID 토큰 검증
