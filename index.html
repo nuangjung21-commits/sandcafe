@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>샌드카페 사장님 비서</title>
+  <script>
+    // 다른 Vercel 미리보기 주소로 접속한 경우 승인된 고정 주소(sandcafe-steel.vercel.app)로 자동 이동
+    if (
+      window.location.hostname.endsWith('.vercel.app') &&
+      window.location.origin !== 'https://sandcafe-steel.vercel.app'
+    ) {
+      window.location.replace('https://sandcafe-steel.vercel.app' + window.location.pathname + window.location.search);
+    }
+  </script>
   <!-- Google 로그인 (Google Identity Services) -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleLibraryLoad()"></script>
   <style>
